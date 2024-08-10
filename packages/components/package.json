@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "name": "@personality-scraper/components",
+  "version": "0.1.0",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "scripts": {
+    "test:ci": "echo \"No tests\"",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@personality-scraper/common": "*",
+    "@personality-scraper/constants": "*",
+    "@personality-scraper/styles": "*",
+    "@hookform/resolvers": "^3.3.4",
+    "@phosphor-icons/react": "^2.1.5",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.1.0",
+    "next-themes": "^0.3.0",
+    "vaul": "^0.9.1",
+    "tailwindcss": "^3.4.1",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "react-hook-form": "^7.52.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@personality-scraper/types": "*",
+    "react-error-boundary": "^4.0.13"
+  }
+}

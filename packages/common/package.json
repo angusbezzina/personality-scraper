@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "name": "@personality-scraper/common",
+  "version": "0.1.0",
+  "sideEffects": false,
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:ci": "echo \"No tests\"",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@personality-scraper/constants": "*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@personality-scraper/types": "*",
+    "vitest": "^1.6.0"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "private": true,
+  "name": "@personality-scraper/api",
+  "version": "0.1.0",
+  "sideEffects": false,
+  "exports": {
+    "./client": "./src/client/index.ts",
+    "./server": "./src/server/index.ts"
+  },
+  "scripts": {
+    "test:ci": "echo \"No tests\"",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@personality-scraper/common": "*",
+    "@personality-scraper/constants": "*",
+    "@tanstack/react-query": "^5.29.2",
+    "async-retry": "^1.3.3",
+    "immer": "^10.1.1",
+    "next": "^14.2.3",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@personality-scraper/types": "*",
+    "@types/async-retry": "^1.4.8"
+  }
+}

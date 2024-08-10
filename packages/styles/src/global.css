@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 4%;
+    --primary: 240 6% 10%;
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 240 5% 26%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    --secondary-hover: 240 5% 84%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --faint: 0 0% 98%;
+    --faint-foreground: 240 5% 65%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 6% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --destructive-hover: 0 72% 51%;
+    --border: 240 6% 90%;
+    --highlight: 240, 100%, 50%;
+    --hyperlink: 240, 100%, 50%;
+    --input: 240 6% 90%;
+    --ring: 240 5% 65%;
+    --radius: 0.25rem;
+    --brand: 245, 58%, 51%;
+
+    --text-jumbo-size: 3.5rem;
+    --text-jumbo-leading: 1.1;
+    --text-xl-size: 2.75rem;
+    --text-xl-leading: 1.1;
+    --text-h1-size: 2.25rem;
+    --text-h1-leading: 1.1;
+    --text-h2-size: 1.5rem;
+    --text-h2-leading: 1.2;
+    --text-h3-size: 1.25rem;
+    --text-h3-leading: 1.3;
+    --text-h4-size: 1.125rem;
+    --text-h4-leading: 1.4;
+    --text-lead-size: 1.25rem;
+    --text-lead-leading: 1.4;
+    --text-large-size: 1.125rem;
+    --text-large-leading: 1.5;
+    --text-p-size: 1rem;
+    --text-p-leading: 1.625;
+    --text-p-ui-size: 1rem;
+    --text-p-ui-leading: 1.5;
+    --text-form-size: 1rem;
+    --text-form-leading: 1.5;
+    --text-form-small-size: 0.75rem;
+    --text-form-small-leading: 1.5;
+    --text-list-size: 1rem;
+    --text-list-leading: 1.5;
+    --text-body-size: 0.875rem;
+    --text-body-leading: 1.625;
+    --text-subtle-size: 0.875rem;
+    --text-subtle-leading: 1.4;
+    --text-small-size: 0.875rem;
+    --text-small-leading: 1;
+    --text-detail-size: 0.75rem;
+    --text-detail-leading: 1;
+    --text-blockquote-size: 1rem;
+    --text-blockquote-leading: 1.5;
+    --text-inline-code-size: 0.875rem;
+    --text-inline-code-leading: 1.4;
+    --text-table-head-size: 1rem;
+    --text-table-head-leading: 1.5;
+    --text-table-item-size: 1rem;
+    --text-table-item-leading: 1.5;
+  }
+
+  @media screen(sm) {
+    :root {
+      --text-jumbo-size: 5.5rem;
+      --text-xl-size: 4rem;
+      --text-h1-size: 3rem;
+      --text-h2-size: 2.25rem;
+      --text-h3-size: 1.5rem;
+      --text-h4-size: 1.25rem;
+      --text-lead-size: 1.25rem;
+      --text-large-size: 1.125rem;
+      --text-p-size: 1rem;
+      --text-p-ui-size: 1rem;
+      --text-form-size: 1rem;
+      --text-form-small-size: 0.75rem;
+      --text-list-size: 1rem;
+      --text-body-size: 0.875rem;
+      --text-subtle-size: 0.875rem;
+      --text-small-size: 0.875rem;
+      --text-detail-size: 0.75rem;
+      --text-blockquote-size: 1rem;
+      --text-inline-code-size: 0.875rem;
+      --text-table-head-size: 1rem;
+      --text-table-item-size: 1rem;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 240 6% 10%;
+      --foreground: 0 0% 98%;
+      --card: 240 6% 10%;
+      --card-foreground: 0 0% 98%;
+      --popover: 240 6% 10%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 0 0% 98%;
+      --primary-foreground: 240 6% 10%;
+      --primary-hover: 240 6% 90%;
+      --secondary: 240 5% 26%;
+      --secondary-foreground: 0 0% 98%;
+      --secondary-hover: 240 5% 34%;
+      --muted: 240 6% 22%;
+      --muted-foreground: 240 5% 65%;
+      --faint: 240 4% 16%;
+      --faint-foreground: 240 4% 46%;
+      --accent: 240 6% 22%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 72% 51%;
+      --destructive-foreground: 0 0% 98%;
+      --destructive-hover: 0 84% 60%;
+      --border: 240 5% 26%;
+      --highlight: 226, 100%, 51%;
+      --hyperlink: 218, 100%, 74%;
+      --input: 240 5% 26%;
+      --ring: 240 5% 84%;
+      --brand: 234, 89%, 74%;
+    }
+  }
+
+  *,
+  *::after,
+  *::before {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  input[type="search"]::-ms-clear,
+  input[type="search"]::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* clears the 'X' from Chrome */
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    display: none;
+  }
+
+  .text-jumbo,
+  .text-xl {
+    letter-spacing: -0.027em;
+  }
+
+  .text-h1 {
+    letter-spacing: -0.01em;
+  }
+
+  .text-h2 {
+    letter-spacing: -0.0075em;
+  }
+
+  .text-h3 {
+    letter-spacing: -0.006em;
+  }
+
+  .text-h4 {
+    letter-spacing: -0.005em;
+  }
+
+  .text-jumbo,
+  .text-xl,
+  .text-h1,
+  .text-h2,
+  .text-h3,
+  .text-h4,
+  .text-large {
+    @apply font-heading;
+  }
+
+  .text-small,
+  .text-detail {
+    @apply font-medium;
+  }
+
+  .truncate-2,
+  .truncate-3 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @supports (-webkit-box-orient: vertical) {
+    .truncate-2 {
+      display: -webkit-box;
+      white-space: initial;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .truncate-3 {
+      display: -webkit-box;
+      white-space: initial;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

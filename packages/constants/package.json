@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "@personality-scraper/constants",
+  "version": "0.1.0",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "scripts": {
+    "test:ci": "echo \"No tests\"",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@personality-scraper/types": "*"
+  }
+}

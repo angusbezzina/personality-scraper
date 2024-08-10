@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "baseUrl": "src",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "incremental": true,
+    "typeRoots": ["./node_modules/@types", "./typings"]
+  },
+  "extends": "../../tsconfig.json",
+  "include": ["../../types/*.ts", "**/*.ts", "**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts"]
+}

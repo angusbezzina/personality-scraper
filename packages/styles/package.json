@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "@personality-scraper/styles",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./global.css": "./src/global.css",
+    "./tailwind.config": "./src/tailwind.config.ts"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "test:ci": "echo \"No tests\"",
+    "typecheck": "tsc"
+  },
+  "peerDependencies": {
+    "next": "*"
+  },
+  "devDependencies": {
+    "react": "^18.2.0",
+    "tailwindcss": "^3.4.1",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

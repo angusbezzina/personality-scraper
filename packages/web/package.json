@@ -1,0 +1,46 @@
+{
+  "name": "@personality-scraper/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:debug": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@next/bundle-analyzer": "^14.2.4",
+    "@personality-scraper/styles": "*",
+    "@personality-scraper/ai": "*",
+    "@personality-scraper/api": "*",
+    "@personality-scraper/common": "^0.1.0",
+    "@personality-scraper/components": "*",
+    "@personality-scraper/constants": "*",
+    "@phosphor-icons/react": "^2.1.5",
+    "graphql": "^16.9.0",
+    "graphql-request": "^7.1.0",
+    "i18n-iso-countries": "^7.11.2",
+    "next": "^14.2.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-error-boundary": "^4.0.13",
+    "slate": "^0.103.0"
+  },
+  "devDependencies": {
+    "@personality-scraper/types": "*",
+    "@prisma/nextjs-monorepo-workaround-plugin": "^5.8.1",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "autoprefixer": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.4.1",
+    "typescript": "*",
+    "vitest": "^1.6.0"
+  }
+}
