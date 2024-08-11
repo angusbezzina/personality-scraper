@@ -5,6 +5,7 @@ import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { END, MemorySaver, START, StateGraph, type StateGraphArgs } from "@langchain/langgraph/web";
 
 import { z } from "@personality-scraper/common/validation";
+import { getYoutubeTranscripts } from "@personality-scraper/scrape";
 import { type PersonalityScraper } from "@personality-scraper/types";
 
 import { gpt } from "./models";
@@ -100,9 +101,9 @@ export async function createPersonalityPrompt({
       description: "Gathers a list of transcripts from YouTube videos for a specific user",
       schema: YouTubeSchema,
       func: async ({ handle }: z.infer<typeof YouTubeSchema>) => {
-        // TODO: Scrape context for YouTube...
+        const transcripts = await getYoutubeTranscripts(handle);
 
-        return "";
+        return transcripts.map((item) => JSON.stringify(item)).join(", ");
       },
     });
 

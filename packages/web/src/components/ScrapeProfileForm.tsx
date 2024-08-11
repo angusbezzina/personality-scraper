@@ -5,7 +5,7 @@ import React from "react";
 import { z } from "@personality-scraper/common/validation";
 import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Textarea, useForm, zodResolver } from "@personality-scraper/components";
 import { At, User } from "@phosphor-icons/react/dist/ssr";
-import { callPromptAgent, getTranscripts } from "@personality-scraper/api/client";
+import { callPromptAgent } from "@personality-scraper/api/client";
 import { downloadTextAsFile } from "@personality-scraper/common/downloadTextFile";
 
 const SocialSchema = z.object({
@@ -29,13 +29,10 @@ export function ScrapeProfileForm() {
 
   async function onSubmit(data: z.infer<typeof SocialSchema>) {
     const { name, youtube, strategy } = data;
-    // const result = await callPromptAgent({ name, socials: { youtube }, strategy });
-    const transcripts = await getTranscripts(youtube);
+    const result = await callPromptAgent({ name, socials: { youtube }, strategy });
 
-    // if (result) {
-    if (youtube) {
-      console.log("YOUTUBE", youtube);
-      // downloadTextAsFile(`${youtube}-prompt`, result);
+    if (result) {
+      downloadTextAsFile(`${youtube}-prompt`, result);
       setMessage("Boom goes the dynamite... 🧨💥");
       reset();
     } else {

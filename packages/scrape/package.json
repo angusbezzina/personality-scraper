@@ -12,6 +12,7 @@
   "dependencies": {
     "@personality-scraper/common": "*",
     "@personality-scraper/constants": "*",
+    "dotenv": "^16.4.5",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {

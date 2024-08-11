@@ -1,50 +1,31 @@
-import { getPathWithParams, getPathWithQuery } from "@personality-scraper/common/query";
-import { YOUTUBE_CAPTION, YOUTUBE_CAPTIONS, YOUTUBE_SEARCH } from "@personality-scraper/constants";
+import { YoutubeTranscript } from 'youtube-transcript';
 
-async function downloadTranscript(captionId: string) {
+import('dotenv').then(dotenv => {
+    dotenv.config({ path: '../../web/.env.local' });
+});
+
+import { getPathWithQuery } from "@personality-scraper/common/query";
+import { YOUTUBE_SEARCH } from "@personality-scraper/constants";
+
+
+async function downloadTranscript(videoId: string) {
     try {
-        const transcriptPath = getPathWithQuery(getPathWithParams(YOUTUBE_CAPTION, { id: captionId }), {
-            tlang: "en",
-            tfmt: "srt",
-        });
-
-        const response = await fetch(transcriptPath);
-        const result = await response.json();
-
-        console.log("TRANSCRIPT", result);
+        const result = await YoutubeTranscript.fetchTranscript(videoId);
+        
+        return result;
     } catch (error) {
         console.error(error);
-
-        throw new Error("Failed to download YouTube transcript.");
-    }
-}
-
-async function downloadCaption(videoId: string) {
-    try {
-        const captionPath = getPathWithQuery(YOUTUBE_CAPTIONS, {
-            key: "AIzaSyCwRQcgwsJOFOrVp0tqpi_X_CBZ9yme11U",
-            part: "id",
-            videoId,
-        });
-
-        const captionResponse = await fetch(captionPath);
-        const captionResult = await captionResponse.json();
-        const captionIds = captionResult.items.map(({ id }: any) => id);
-
-        const transcripts = await Promise.all(captionIds.map(downloadTranscript));
-
-    } catch (error) {
-        console.error(error);
-        throw new Error(`Failed to get YouTube captio for video ${videoId}.`);
+        throw new Error(`Failed to get transcript for video ${videoId}.`);
     }
 }
 
 export async function getYoutubeTranscripts(handle: string) {
   try {
-    // TODO: Step One, get channel ID, Step Two, get videos
+    // TODO: Step One get channel ID organically...
     const videoIdPath = getPathWithQuery(YOUTUBE_SEARCH, {
-        key: "AIzaSyCwRQcgwsJOFOrVp0tqpi_X_CBZ9yme11U",
-        channelId: "UCEjIjshJ8bvvCkGNk0pkYcA",
+        key: process.env.YOUTUBE_API_KEY,
+        channelId: handle,
+        // channelId: "UCEjIjshJ8bvvCkGNk0pkYcA",
         type: "video",
         videoCaption: "closedCaption",
         part: "id",
@@ -62,11 +43,9 @@ export async function getYoutubeTranscripts(handle: string) {
 
     if (videoIds.length === 0) return [];
 
-    const transcripts = await Promise.all(videoIds.map(downloadCaption)) || [];
+    const transcripts = (await Promise.all(videoIds.map(downloadTranscript))).flat(2);
 
-    console.log("TRANSCRIPTS", transcripts);
-
-    return [];
+    return transcripts;
   } catch (error) {
     console.error(error);
 
