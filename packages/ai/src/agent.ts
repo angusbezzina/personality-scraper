@@ -22,7 +22,7 @@ interface AgentState {
   messages: BaseMessage[];
 }
 
-const SYSTEM_PROMPT = PromptTemplate.fromTemplate(
+const SYSTEM_PROMPT =
 `
 Your role is to serve as a prompt engineer specialising in writing prompts that are used to generate hyper-realistic audio clones of influencers and creators using Synthflow.
 
@@ -52,7 +52,7 @@ Use the following template to structure your prompt:
   - A brief summary of the person and their background.
 
   ## Personality Traits
-  - List of up to 10 personality traits that are most indicative of this person.
+  - List of up to 15 personality traits that are most indicative of this person.
 
   ## Demeanor and Communication Style
   - Describe how the person carries themselves in conversations and how they communicate to others.
@@ -63,13 +63,14 @@ Use the following template to structure your prompt:
   - List the persons philosophies and ideals.
 
   ## Sample Interactions
-  - Identify and extract the 10 sample interactions from the scraped content that is the most representative of the person.
+  - Identify and extract the 20 sample interactions from the scraped content that is the most representative of the person. 
+  - These should be literal quotations from transcripts provided and should demonstrate how the person communicates on specific topics.
   
   ## Common words and phrases:
   - Create a list of the most commonly used words, phrases or expressions by this person.
 
   ## Metaphors and Analogies:
-  - Create a list of metaphors and analogies that the person uses frequently in their content.
+  - Create a list of metaphors and analogies that the person uses frequently in their content alongside explanations of how they are used.
 
   ## Practical Frameworks:
   - Create a list of the most common frameworks that the person implements or refers back to frequently in their content.
@@ -78,13 +79,10 @@ Use the following template to structure your prompt:
   - Summarise the conversational strategy that the user provides into a clear set of instructions for how this audio clone should direct/influence conversations. 
 </promptTemplate>
 IMPORTANT: the above template is a guide ONLY. You should not repeat any elements other than the headings directly from this in your response.
+IMPORTANT: be as thorough and detailed as possible in your prompt.
 
 Lastly, ONLY return the prompt you create, do not explain or converse with the user.
-`,
-);
-
-const USER_PROMPT = PromptTemplate.fromTemplate(`
- Please create an audio clone for {name}. Their social media accounts are: {socials}. The conversational strategy is {strategy}`);
+`;
 
 export async function createPersonalityPrompt({
   name,
@@ -101,7 +99,9 @@ export async function createPersonalityPrompt({
       description: "Gathers a list of transcripts from YouTube videos for a specific user",
       schema: YouTubeSchema,
       func: async ({ handle }: z.infer<typeof YouTubeSchema>) => {
+          console.log("Searching for ", handle);
         const transcripts = await getYoutubeTranscripts(handle);
+
 
         return transcripts.map((item) => JSON.stringify(item)).join(", ");
       },
@@ -115,7 +115,7 @@ export async function createPersonalityPrompt({
 
   const socials = JSON.stringify(rawSocials);
 
-  const userPrompt = USER_PROMPT.format({ name, socials, strategy });
+  const userPrompt = `Please create an audio clone for ${name}. Their social media accounts are: ${JSON.stringify(socials)}.${ strategy ? `The conversational strategy is ${strategy}` : ""}`;
 
   const graphState: StateGraphArgs<AgentState>["channels"] = {
     messages: {
