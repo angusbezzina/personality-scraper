@@ -3,11 +3,12 @@
 import React from "react";
 
 import { z } from "@personality-scraper/common/validation";
-import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, useForm, zodResolver } from "@personality-scraper/components";
+import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Textarea, useForm, zodResolver } from "@personality-scraper/components";
 import { At } from "@phosphor-icons/react/dist/ssr";
 
 const SocialSchema = z.object({
   social: z.string().min(2, "Please enter a valid social handle"),
+  strategy: z.string().min(100, "Please enter a valid strategy")
 });
 
 export function ScrapeProfileForm() {
@@ -16,6 +17,7 @@ export function ScrapeProfileForm() {
     resolver: zodResolver(SocialSchema),
     defaultValues: {
       social: "",
+      strategy: ""
     },
   });
   const { handleSubmit } = form;
@@ -23,7 +25,7 @@ export function ScrapeProfileForm() {
   async function onSubmit(data: z.infer<typeof SocialSchema>) {
     const { social } = data;
 
-    console.log("Boom goes the dynamite...", social);
+    console.log("Boom goes the dynamite... 🧨💥", social);
   }
 
   return (
@@ -41,6 +43,19 @@ export function ScrapeProfileForm() {
               <FormLabel />
               <FormControl>
                 <Input type="text" {...field} iconLeft={<At />} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="strategy"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel />
+              <FormControl>
+                <Textarea rows={10} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

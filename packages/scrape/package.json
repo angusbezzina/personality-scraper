@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@personality-scraper/ai",
+  "name": "@personality-scraper/scrape",
   "version": "0.1.0",
   "sideEffects": false,
   "main": "./src/index.ts",
@@ -10,16 +10,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@langchain/community": "^0.2.12",
-    "@langchain/core": "^0.1.58",
-    "@langchain/langgraph": "^0.0.26",
-    "@langchain/openai": "^0.0.28",
-    "@personality-scraper/common": "*",
-    "langchain": "^0.1.34",
-    "langsmith": "^0.1"
   },
   "devDependencies": {
-    "@personality-scraper/types": "*",
     "image-size": "^1.1.1",
     "open": "^10.1.0",
     "puppeteer": "^19.11.1",
