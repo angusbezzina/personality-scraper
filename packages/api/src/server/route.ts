@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { HttpStatus } from "@personality-scraper/constants";
 
-import { getYouTubeTranscripts } from "./actions";
+import { callPromptAgent, getTranscripts } from "./actions";
 
 const publicActions = {};
 
 export const privateActions = {
-  getYouTubeTranscripts,
+  callPromptAgent,
+  getTranscripts,
 };
 
 const actions = {

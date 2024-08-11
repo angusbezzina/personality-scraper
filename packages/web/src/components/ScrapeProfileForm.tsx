@@ -4,29 +4,48 @@ import React from "react";
 
 import { z } from "@personality-scraper/common/validation";
 import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Textarea, useForm, zodResolver } from "@personality-scraper/components";
-import { At } from "@phosphor-icons/react/dist/ssr";
+import { At, User } from "@phosphor-icons/react/dist/ssr";
+import { callPromptAgent, getTranscripts } from "@personality-scraper/api/client";
+import { downloadTextAsFile } from "@personality-scraper/common/downloadTextFile";
 
 const SocialSchema = z.object({
-  social: z.string().min(2, "Please enter a valid social handle"),
+  name: z.string().min(2, "Please enter a valid name"),
+  youtube: z.string().min(2, "Please enter a valid YouTube handle"),
   strategy: z.string().min(100, "Please enter a valid strategy")
 });
 
 export function ScrapeProfileForm() {
+  const [message, setMessage] = React.useState<string>();
   const form = useForm({
     mode: "onSubmit",
     resolver: zodResolver(SocialSchema),
     defaultValues: {
-      social: "",
+      name: "",
+      youtube: "",
       strategy: ""
     },
   });
-  const { handleSubmit } = form;
+  const { handleSubmit, reset } = form;
 
   async function onSubmit(data: z.infer<typeof SocialSchema>) {
-    const { social } = data;
+    const { name, youtube, strategy } = data;
+    // const result = await callPromptAgent({ name, socials: { youtube }, strategy });
+    const transcripts = await getTranscripts(youtube);
 
-    console.log("Boom goes the dynamite... 🧨💥", social);
+    // if (result) {
+    if (youtube) {
+      console.log("YOUTUBE", youtube);
+      // downloadTextAsFile(`${youtube}-prompt`, result);
+      setMessage("Boom goes the dynamite... 🧨💥");
+      reset();
+    } else {
+      setMessage("Something went wrong 😔");
+    }
   }
+
+  React.useEffect(() => {
+    setMessage(undefined);
+  }, []);
 
   return (
     <Form {...form}>
@@ -34,15 +53,28 @@ export function ScrapeProfileForm() {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full flex flex-col justify-start items-start rounded-md gap-4 md:gap-6 p-4 md:p-8 shadow-lg bg-secondary"
       >
-        <h3 className="text-h4 font-bold">What&apos;s your YouTube handle here</h3>
+        <h3 className="text-h4 font-bold">Personality Scraper<span className="text-brand">.</span></h3>
         <FormField
           control={form.control}
-          name="social"
+          name="name"
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel />
+              <FormLabel className="text-brand">Name</FormLabel>
               <FormControl>
-                <Input type="text" {...field} iconLeft={<At />} />
+                <Input type="text" {...field} placeholder="John Smith" iconLeft={<User />} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="youtube"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel className="text-brand">YouTube Handle</FormLabel>
+              <FormControl>
+                <Input type="text" {...field} iconLeft={<At />} placeholder="userName" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -53,17 +85,18 @@ export function ScrapeProfileForm() {
           name="strategy"
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel />
+              <FormLabel className="text-brand">Call Strategy</FormLabel>
               <FormControl>
-                <Textarea rows={10} {...field} />
+                <Textarea rows={5} {...field} className="resize-none" placeholder="I want the AI to sell users products X, Y and Z..." />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" size="lg">
+        <Button type="submit" size="lg" className="bg-brand">
           Generate
         </Button>
+        {message && <p className="py-3">{message}</p>}
       </form>
     </Form>
   );

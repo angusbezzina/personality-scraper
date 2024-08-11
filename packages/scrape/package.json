@@ -10,11 +10,11 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@personality-scraper/common": "*",
+    "@personality-scraper/constants": "*",
+    "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
-    "image-size": "^1.1.1",
-    "open": "^10.1.0",
-    "puppeteer": "^19.11.1",
     "vitest": "^1.6.0"
   }
 }

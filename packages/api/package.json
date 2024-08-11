@@ -12,8 +12,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@personality-scraper/ai": "*",
     "@personality-scraper/common": "*",
     "@personality-scraper/constants": "*",
+    "@personality-scraper/scrape": "*",
     "@tanstack/react-query": "^5.29.2",
     "async-retry": "^1.3.3",
     "immer": "^10.1.1",

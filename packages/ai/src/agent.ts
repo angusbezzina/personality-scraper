@@ -10,15 +10,15 @@ import { type PersonalityScraper } from "@personality-scraper/types";
 import { gpt } from "./models";
 import { YouTubeSchema } from "./schemas";
 
-interface AgentState {
-  messages: BaseMessage[];
-}
-
-type PersonalityCreationPrompt = {
+export type PersonalityCreationPrompt = {
   name: string;
   socials: PersonalityScraper.SocialInput;
-  instruction?: string;
+  strategy?: string;
   additionalContext?: string[][]; // More RAG content...
+}
+
+interface AgentState {
+  messages: BaseMessage[];
 }
 
 const SYSTEM_PROMPT = PromptTemplate.fromTemplate(
@@ -83,24 +83,24 @@ Lastly, ONLY return the prompt you create, do not explain or converse with the u
 );
 
 const USER_PROMPT = PromptTemplate.fromTemplate(`
- Please create an audio clone for {name}. Their social media accounts are: {socials}.`);
+ Please create an audio clone for {name}. Their social media accounts are: {socials}. The conversational strategy is {strategy}`);
 
 export async function createPersonalityPrompt({
   name,
   socials: rawSocials,
+  strategy,
   additionalContext
-}: PersonalityCreationPrompt) {
-  let payloads: Record<string, any> = {};
-
+}: PersonalityCreationPrompt): Promise<string | undefined> {
   // Model
   const llm = gpt();
 
-  // Define Tools
+  // Tools
     const scrapeYouTube = new DynamicStructuredTool({
       name: "scrape_youtube",
       description: "Gathers a list of transcripts from YouTube videos for a specific user",
       schema: YouTubeSchema,
       func: async ({ handle }: z.infer<typeof YouTubeSchema>) => {
+        // TODO: Scrape context for YouTube...
 
         return "";
       },
@@ -114,7 +114,7 @@ export async function createPersonalityPrompt({
 
   const socials = JSON.stringify(rawSocials);
 
-  const userPrompt = USER_PROMPT.format({ name, socials });
+  const userPrompt = USER_PROMPT.format({ name, socials, strategy });
 
   const graphState: StateGraphArgs<AgentState>["channels"] = {
     messages: {
@@ -161,13 +161,14 @@ export async function createPersonalityPrompt({
 
   const app = workflow.compile();
 
-  // NOTE: We don't want to return the chat output, just the payloads
-  await app.invoke({
+  const finalState = await app.invoke({
     messages: prompt,
   });
 
   console.log("SYSTEM PROMPT", SYSTEM_PROMPT);
   console.log("USER PROMPT", userPrompt);
-  console.log("PAYLOADS", Object.values(payloads));
-  return { actions: Object.values(payloads) };
+  console.log("FINAL STATE", finalState);
+  const lastMessage = finalState.messages[finalState.messages.length - 1].content
+
+  return lastMessage;
 }

@@ -51,3 +51,8 @@ export enum HttpStatus {
   ServiceUnavailable = 503,
   GatewayTimeout = 504,
 }
+
+export const YOUTUBE_STEM = "https://www.googleapis.com/youtube/v3";
+export const YOUTUBE_SEARCH = `${YOUTUBE_STEM}/search`;
+export const YOUTUBE_CAPTIONS = `${YOUTUBE_STEM}/captions`;
+export const YOUTUBE_CAPTION = `${YOUTUBE_STEM}/captions/[id]`;
