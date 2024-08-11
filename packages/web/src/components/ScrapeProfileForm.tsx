@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-
-import { z } from "@personality-scraper/common/validation";
-import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Textarea, useForm, zodResolver } from "@personality-scraper/components";
 import { At, User } from "@phosphor-icons/react/dist/ssr";
+
 import { callPromptAgent } from "@personality-scraper/api/client";
 import { downloadTextAsFile } from "@personality-scraper/common/downloadTextFile";
+import { z } from "@personality-scraper/common/validation";
+import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input, Textarea, useForm, zodResolver } from "@personality-scraper/components";
 
 const SocialSchema = z.object({
   name: z.string().min(2, "Please enter a valid name"),
