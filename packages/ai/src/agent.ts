@@ -99,7 +99,6 @@ export async function createPersonalityPrompt({
       description: "Gathers a list of transcripts from YouTube videos for a specific user",
       schema: YouTubeSchema,
       func: async ({ handle }: z.infer<typeof YouTubeSchema>) => {
-          console.log("Searching for ", handle);
         const transcripts = await getYoutubeTranscripts(handle);
 
 
