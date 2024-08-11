@@ -13,6 +13,7 @@ const metadataBase = IS_DEV ? new URL(`http://${APP_HOST_DEV}/`) : undefined;
 export const metadata: Metadata = {
   metadataBase,
   title,
+  icons: `${metadataBase}/favicon.ico`,
   description,
   openGraph: {
     title,

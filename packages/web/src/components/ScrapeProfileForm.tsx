@@ -25,7 +25,8 @@ export function ScrapeProfileForm() {
       strategy: ""
     },
   });
-  const { handleSubmit, reset } = form;
+  const { handleSubmit, reset, watch } = form;
+  const values = watch();
 
   async function onSubmit(data: z.infer<typeof SocialSchema>) {
     const { name, youtube, strategy } = data;
@@ -42,7 +43,7 @@ export function ScrapeProfileForm() {
 
   React.useEffect(() => {
     setMessage(undefined);
-  }, []);
+  }, [values]);
 
   return (
     <Form {...form}>
