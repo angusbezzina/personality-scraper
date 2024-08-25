@@ -95,7 +95,7 @@ export async function createPersonalityPrompt({
     schema: PerplexitySchema,
     func: async ({ name }: z.infer<typeof PerplexitySchema>) => {
       // TODO: Angus to implement
-      return "";
+      return `No more information found for ${name}`;
     },
   });
 
