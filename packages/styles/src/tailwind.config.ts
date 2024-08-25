@@ -8,7 +8,6 @@ export const config = {
     "../web/src/app/**/*.{ts,tsx}",
   ],
   theme: {
-
     container: {
       center: true,
       padding: "2rem",

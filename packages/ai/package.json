@@ -10,7 +10,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@personality-scraper/scrape": "*",
+    "@personality-scraper/services": "*",
     "@langchain/community": "^0.2.12",
     "@langchain/core": "^0.1.58",
     "@langchain/langgraph": "^0.0.26",

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
 
-import { Home } from "@/components/Home";
+import { auth } from "../auth";
+import { Home } from "../components/Home";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Personality Scraper | Home";
@@ -21,5 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  return <Home />;
+  const session = await auth();
+  return (
+    <SessionProvider session={session}>
+      <Home />
+    </SessionProvider>
+  );
 }

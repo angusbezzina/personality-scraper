@@ -1,4 +1,4 @@
-import { Merriweather_Sans,Montserrat } from "next/font/google";
+import { Merriweather_Sans, Montserrat } from "next/font/google";
 import type React from "react";
 
 const montserrat = Montserrat({

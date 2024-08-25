@@ -53,6 +53,11 @@ export enum HttpStatus {
 }
 
 export const YOUTUBE_STEM = "https://www.googleapis.com/youtube/v3";
-export const YOUTUBE_SEARCH = `${YOUTUBE_STEM}/search`;
-export const YOUTUBE_CAPTIONS = `${YOUTUBE_STEM}/captions`;
-export const YOUTUBE_CAPTION = `${YOUTUBE_STEM}/captions/[id]`;
+export const YOUTUBE_ROUTES = {
+  search: `${YOUTUBE_STEM}/search`,
+  channel: `${YOUTUBE_STEM}/channels`,
+  caption: `${YOUTUBE_STEM}/caption/[id]`,
+  captions: `${YOUTUBE_STEM}/caption`,
+};
+export const YOUTUBE_SCOPES = { readOnly: "https://www.googleapis.com/auth/youtube.readonly" };
+export const YOUTUBE_API_VERSION = "v3";

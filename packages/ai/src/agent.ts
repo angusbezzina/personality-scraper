@@ -1,39 +1,31 @@
+import type { Tool } from "langchain/tools";
 import { type AIMessage, type BaseMessage } from "@langchain/core/messages";
-import { PromptTemplate } from "@langchain/core/prompts";
-import { DynamicStructuredTool } from "@langchain/core/tools";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { END, MemorySaver, START, StateGraph, type StateGraphArgs } from "@langchain/langgraph/web";
 
-import { z } from "@personality-scraper/common/validation";
-import { getYoutubeTranscripts } from "@personality-scraper/scrape";
 import { type PersonalityScraper } from "@personality-scraper/types";
 
 import { gpt } from "./models";
-import { YouTubeSchema } from "./schemas";
 
 export type PersonalityCreationPrompt = {
   name: string;
-  socials: PersonalityScraper.SocialInput;
+  rag: PersonalityScraper.SocialData;
   strategy?: string;
-  additionalContext?: string[][]; // More RAG content...
-}
+};
 
 interface AgentState {
   messages: BaseMessage[];
 }
 
-const SYSTEM_PROMPT =
-`
+const SYSTEM_PROMPT = `
 Your role is to serve as a prompt engineer specialising in writing prompts that are used to generate hyper-realistic audio clones of influencers and creators using Synthflow.
 
 Synthflow is a service that creates AI voice assistants using prompts and audio clips.
 
-Users will provide you with the name and social media handles of a creator for whom they want to create an audio clone.
+Users will provide you with the name as well as background information that has been scraped from social media platforms of a creator for whom they want to create an audio clone.
 
 Your responsibility to generate the prompt that Synthflow will use to create that audio clone, following these steps EXACTLY:
-1. Take the social media handles from the JSON input the user provides and scrape the associated platform for information about the user using the helper tools provided.
-
-2. Construct a personality profile from the information that is returned from the social media accounts that have been scraped. Ensure you take note of these particular points:
+1. Construct a personality profile from background information that is provided. Ensure you take note of these particular points:
 * Personal background, including age, gender, nationality, ethnic background, education, pivotal life events and any known family members or close friends.
 * Personality traits - outline up to 10 of the most distinctive traits that describe this person.
 * Demeanor - how this person communicates.
@@ -45,7 +37,7 @@ Your responsibility to generate the prompt that Synthflow will use to create tha
 * Practical frameworks - Ideologies, paradigms or strategies that the person implements or refers back to frequently in their content.
 * Tonality, Inflection, Voice modulation or any other distinctive aspects of the person's speech/communication.
 
-3. Use the personality profile and any additional information you think is relevant to construct a prompt that will be used to generate the audio clone.
+2. Use the personality profile and any additional information you think is relevant to construct a prompt that will be used to generate the audio clone.
 Use the following template to structure your prompt:
 <promptTemplate>
   ## Background
@@ -86,35 +78,37 @@ Lastly, ONLY return the prompt you create, do not explain or converse with the u
 
 export async function createPersonalityPrompt({
   name,
-  socials: rawSocials,
+  rag,
   strategy,
-  additionalContext
 }: PersonalityCreationPrompt): Promise<string | undefined> {
   // Model
   const llm = gpt();
 
   // Tools
-    const scrapeYouTube = new DynamicStructuredTool({
-      name: "scrape_youtube",
-      description: "Gathers a list of transcripts from YouTube videos for a specific user",
-      schema: YouTubeSchema,
-      func: async ({ handle }: z.infer<typeof YouTubeSchema>) => {
-        const transcripts = await getYoutubeTranscripts(handle);
 
+  // NOTE: Example tool structure...
+  // const scrapeYouTube = new DynamicStructuredTool({
+  //   name: "scrape_youtube",
+  //   description: "Gathers a list of transcripts from YouTube videos for a specific user",
+  //   schema: YouTubeSchema,
+  //   func: async ({ handle }: z.infer<typeof YouTubeSchema>) => {
+  //     const transcripts = await getYoutubeTranscripts(handle);
 
-        return transcripts.map((item) => JSON.stringify(item)).join(", ");
-      },
-    });
+  //     return transcripts.map((item) => JSON.stringify(item)).join(", ");
+  //   },
+  // });
 
   // TODO: Scrape context with Perplexity...
   // TODO: Scrape context for Podcasts...
   // TODO: Scrape context for Twitter...
 
-  const tools = [scrapeYouTube];
+  const tools: Tool[] = [];
 
-  const socials = JSON.stringify(rawSocials);
+  const { youtube } = rag;
 
-  const userPrompt = `Please create an audio clone for ${name}. Their social media accounts are: ${JSON.stringify(socials)}.${ strategy ? `The conversational strategy is ${strategy}` : ""}`;
+  const formattedRag = `<youtubeTranscripts>${youtube}</youtubeTranscripts>`;
+
+  const userPrompt = `Please create a prompt for an audio clone for ${name}. Use the following background information in the generation of your prompt: <background>${formattedRag}<background>.${strategy ? `Please also note that the conversational strategy should be: ${strategy}` : ""}`;
 
   const graphState: StateGraphArgs<AgentState>["channels"] = {
     messages: {
@@ -168,7 +162,7 @@ export async function createPersonalityPrompt({
   console.log("SYSTEM PROMPT", SYSTEM_PROMPT);
   console.log("USER PROMPT", userPrompt);
   console.log("FINAL STATE", finalState);
-  const lastMessage = finalState.messages[finalState.messages.length - 1].content
+  const lastMessage = finalState.messages[finalState.messages.length - 1].content;
 
   return lastMessage;
 }

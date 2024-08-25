@@ -1,7 +1,7 @@
-import { getYoutubeTranscripts } from "@personality-scraper/scrape";
+import { YouTube } from "@personality-scraper/services";
 
-export async function getTranscripts(handle: string) {
-    const transcripts = await getYoutubeTranscripts(handle);
+export async function getTranscripts(accessToken: string) {
+  const transcripts = YouTube.batchGetTranscripts(accessToken);
 
-    return transcripts;
+  return transcripts;
 }

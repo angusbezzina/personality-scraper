@@ -44,8 +44,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Providers>
           <div className="relative flex flex-col w-full h-full items-center justify-center">
             {/* <header className="fixed top-0 left-0 w-full flex items-center justify-center shrink-0 h-16">
-              <h4 className="text-h3 font-special font-bold">Personality Scraper<span className="text-brand">.</span></h4>
-            </header> */}
+                  <h4 className="text-h3 font-special font-bold">Personality Scraper<span className="text-brand">.</span></h4>
+                </header> */}
             {children}
           </div>
         </Providers>

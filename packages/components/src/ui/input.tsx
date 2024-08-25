@@ -10,7 +10,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, iconLeft, ...props }, ref) => {
     return (
       <div className="relative z-0">
-        {iconLeft && <span className="absolute top-0 left-0 h-full aspect-square flex items-center justify-center text-foreground z-10">{iconLeft}</span>}
+        {iconLeft && (
+          <span className="absolute top-0 left-0 h-full aspect-square flex items-center justify-center text-foreground z-10">
+            {iconLeft}
+          </span>
+        )}
         <input
           type={type}
           className={cn(

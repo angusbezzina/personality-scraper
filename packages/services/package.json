@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@personality-scraper/scrape",
+  "name": "@personality-scraper/services",
   "version": "0.1.0",
   "sideEffects": false,
   "main": "./src/index.ts",
@@ -10,12 +10,24 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@auth/unstorage-adapter": "^2.4.2",
     "@personality-scraper/common": "*",
     "@personality-scraper/constants": "*",
+    "@personality-scraper/types": "*",
     "dotenv": "^16.4.5",
+    "google-auth-library": "^9.13.0",
+    "googleapis": "^142.0.0",
+    "next": "latest",
+    "next-auth": "beta",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "unstorage": "^1.10.2",
     "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
+    "@types/node": "^20.12.8",
+    "@types/react": "^18.2.23",
+    "@types/react-dom": "^18.2.8",
     "vitest": "^1.6.0"
   }
 }

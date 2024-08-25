@@ -1,7 +1,7 @@
 import { personalityClient } from "./api";
 
-export async function getTranscripts(handle: string) {
-    const transcripts = await personalityClient.getTranscripts(handle);
+export async function getTranscripts(accessToken: string) {
+  const transcripts = await personalityClient.getTranscripts(accessToken);
 
-    return transcripts;
+  return transcripts;
 }
