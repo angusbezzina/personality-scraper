@@ -6,6 +6,8 @@ import { SessionProvider, useSession } from "next-auth/react";
 
 import { YOUTUBE_SCOPES } from "@personality-scraper/constants";
 
+console.log("ENV", process.env.AUTH_GOOGLE_ID, process.env.AUTH_GOOGLE_SECRET);
+
 const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
