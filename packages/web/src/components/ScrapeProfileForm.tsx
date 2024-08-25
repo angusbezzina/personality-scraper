@@ -4,7 +4,7 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import { User } from "@phosphor-icons/react/dist/ssr";
 
-import { callPromptAgent, getTranscripts } from "@personality-scraper/api/client";
+import { callPromptAgent, getTranscripts, useAuth } from "@personality-scraper/api/client";
 import { downloadTextAsFile } from "@personality-scraper/common/downloadTextFile";
 import { z } from "@personality-scraper/common/validation";
 import {
@@ -30,6 +30,7 @@ const SocialSchema = z.object({
 });
 
 export function ScrapeProfileForm() {
+  const { signIn, signOut } = useAuth();
   const session = useSession();
   const [message, setMessage] = React.useState<string>();
   const [{ loading, error }, createPrompt] = useAsyncFn(callPromptAgent);
@@ -37,38 +38,47 @@ export function ScrapeProfileForm() {
     mode: "onSubmit",
     resolver: zodResolver(SocialSchema),
     defaultValues: {
-      name: "",
+      name: session.data?.user?.name || "",
       strategy: undefined,
     },
   });
   const { handleSubmit, reset, watch } = form;
-  const values = watch();
+  const { name, strategy } = watch();
 
   async function onSubmit(data: z.infer<typeof SocialSchema>) {
     const { accessToken } = session.data || {};
     const { name, strategy } = data;
 
     if (!accessToken) {
-      setMessage("Please sign in to scrape profiles");
-      return;
-    }
-
-    const now = new Date().toISOString();
-    const youtube = await getTranscripts(accessToken);
-    const prompt = await createPrompt({ name, rag: { youtube: youtube.join(", ") }, strategy });
-
-    if (!error && prompt) {
-      downloadTextAsFile(`${youtube}-${now}-prompt`, prompt);
-      setMessage("Boom goes the dynamite... 🧨💥");
-      reset();
+      setMessage("Whoops... you need to sign in to scrape profiles");
     } else {
-      setMessage("Something went wrong 😔");
+      const now = new Date().toISOString();
+      const youtube = await getTranscripts(accessToken);
+      const prompt = await createPrompt({ name, rag: { youtube: youtube.join(", ") }, strategy });
+
+      if (!error && prompt) {
+        downloadTextAsFile(`${youtube}-${now}-prompt`, prompt);
+        setMessage("Boom goes the dynamite... 🧨💥");
+        reset();
+      } else {
+        setMessage("Something went wrong 😔");
+      }
     }
+  }
+
+  async function handleSignIn(e: React.MouseEvent) {
+    e.preventDefault();
+    await signIn();
+  }
+
+  async function handleSignOut(e: React.MouseEvent) {
+    e.preventDefault();
+    await signOut();
   }
 
   React.useEffect(() => {
     setMessage(undefined);
-  }, [values]);
+  }, [name, strategy, session.data?.accessToken]);
 
   return (
     <Form {...form}>
@@ -76,9 +86,14 @@ export function ScrapeProfileForm() {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full flex flex-col justify-start items-start rounded-md gap-4 md:gap-6 p-4 md:p-8 shadow-lg bg-secondary min-h-[482px]"
       >
-        <h3 className="text-h4 font-bold">
-          Personality Scraper<span className="text-brand">.</span>
-        </h3>
+        <div className="flex flex-col gap-3">
+          <h1 className="text-h2 font-bold">
+            Creator<span className="text-brand">X</span>
+          </h1>
+          <h3 className="text-h4 font-bold">
+            <span className="text-brand">Personality Scraper</span>.
+          </h3>
+        </div>
         {loading && (
           <LoadingSpinner
             size="2.5rem"
@@ -87,6 +102,15 @@ export function ScrapeProfileForm() {
         )}
         {!loading && (
           <>
+            {!session.data?.accessToken ? (
+              <Button type="button" onClick={handleSignIn}>
+                Connect YouTube
+              </Button>
+            ) : (
+              <Button variant="outline" type="button" onClick={handleSignOut}>
+                Disconnect YouTube
+              </Button>
+            )}
             <FormField
               control={form.control}
               name="name"

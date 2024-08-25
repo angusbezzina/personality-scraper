@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 
-import { auth } from "../auth";
+import { auth } from "@personality-scraper/services";
+
 import { Home } from "../components/Home";
 
 export async function generateMetadata(): Promise<Metadata> {

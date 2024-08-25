@@ -1,3 +1,3 @@
-import { handlers } from "../../../../auth";
+import { handlers } from "@personality-scraper/services";
 
 export const { GET, POST } = handlers;

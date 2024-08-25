@@ -2,10 +2,11 @@ import "next-auth/jwt";
 
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import { SessionProvider, useSession } from "next-auth/react";
 
 import { YOUTUBE_SCOPES } from "@personality-scraper/constants";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -30,6 +31,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
+
+export { handlers, signIn, signOut, auth, useSession, SessionProvider };
 
 declare module "next-auth" {
   interface Session {

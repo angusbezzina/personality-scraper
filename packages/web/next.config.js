@@ -21,6 +21,7 @@ const nextConfig = {
       "@personality-scraper/api/client",
       "@personality-scraper/api/server",
       "@personality-scraper/components",
+      "@personality-scraper/services",
       "@phosphor-icons/react",
       "@phosphor-icons/react/dist/ssr",
     ],
@@ -32,6 +33,7 @@ const nextConfig = {
     "@personality-scraper/constants",
     "@personality-scraper/styles",
     "@personality-scraper/types",
+    "@personality-scraper/services",
     "@personality-scraper/ai",
   ],
 };
