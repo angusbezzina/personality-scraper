@@ -8,7 +8,7 @@ export namespace YouTube {
     try {
       const result = await YoutubeTranscript.fetchTranscript(id);
 
-      return result;
+      return `<youtubeTranscript>${result.map((transcript) => JSON.stringify(transcript)).join(", ")}</youtubeTranscript>`;
     } catch (error) {
       console.error(error);
       throw new Error(`Failed to get transcript for video ${id}.`);
@@ -62,7 +62,6 @@ export namespace YouTube {
           maxResults: 20,
           type: "video",
           order: "date",
-          videoCaption: "closedCaption",
           channelId,
         }),
         {
@@ -91,7 +90,8 @@ export namespace YouTube {
   export async function batchGetTranscripts(accessToken: string) {
     try {
       const videoIds = await batchGetVideos(accessToken);
-      const results = (await Promise.all(videoIds.map(getTranscript))).flat(2);
+      console.log("VIDEO IDS", videoIds);
+      const results = await Promise.all(videoIds.map(getTranscript));
 
       return results;
     } catch (error) {

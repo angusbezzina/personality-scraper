@@ -1,11 +1,13 @@
-import type { Tool } from "langchain/tools";
+import { DynamicStructuredTool, type Tool } from "langchain/tools";
 import { type AIMessage, type BaseMessage } from "@langchain/core/messages";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { END, MemorySaver, START, StateGraph, type StateGraphArgs } from "@langchain/langgraph/web";
 
+import type { z } from "@personality-scraper/common/validation";
 import { type PersonalityScraper } from "@personality-scraper/types";
 
 import { gpt } from "./models";
+import { PerplexitySchema } from "./schemas";
 
 export type PersonalityCreationPrompt = {
   name: string;
@@ -25,7 +27,9 @@ Synthflow is a service that creates AI voice assistants using prompts and audio 
 Users will provide you with the name as well as background information that has been scraped from social media platforms of a creator for whom they want to create an audio clone.
 
 Your responsibility to generate the prompt that Synthflow will use to create that audio clone, following these steps EXACTLY:
-1. Construct a personality profile from background information that is provided. Ensure you take note of these particular points:
+1. Using the tools provided, retrieve any additional relevant information about the creator.
+
+2. Construct a personality profile from the information you have found and the background information that has been provided. Ensure you take note of these particular points:
 * Personal background, including age, gender, nationality, ethnic background, education, pivotal life events and any known family members or close friends.
 * Personality traits - outline up to 10 of the most distinctive traits that describe this person.
 * Demeanor - how this person communicates.
@@ -85,28 +89,24 @@ export async function createPersonalityPrompt({
   const llm = gpt();
 
   // Tools
+  const searchPerplexity = new DynamicStructuredTool({
+    name: "search_perplexity",
+    description: "Uses a search engine to find additional relevant information about the creator",
+    schema: PerplexitySchema,
+    func: async ({ name }: z.infer<typeof PerplexitySchema>) => {
+      // TODO: Angus to implement
+      return "";
+    },
+  });
 
-  // NOTE: Example tool structure...
-  // const scrapeYouTube = new DynamicStructuredTool({
-  //   name: "scrape_youtube",
-  //   description: "Gathers a list of transcripts from YouTube videos for a specific user",
-  //   schema: YouTubeSchema,
-  //   func: async ({ handle }: z.infer<typeof YouTubeSchema>) => {
-  //     const transcripts = await getYoutubeTranscripts(handle);
-
-  //     return transcripts.map((item) => JSON.stringify(item)).join(", ");
-  //   },
-  // });
-
-  // TODO: Scrape context with Perplexity...
   // TODO: Scrape context for Podcasts...
   // TODO: Scrape context for Twitter...
 
-  const tools: Tool[] = [];
+  const tools = [searchPerplexity];
 
   const { youtube } = rag;
 
-  const formattedRag = `<youtubeTranscripts>${youtube}</youtubeTranscripts>`;
+  const formattedRag = `<youtubeData>${youtube}</youtubeData>`;
 
   const userPrompt = `Please create a prompt for an audio clone for ${name}. Use the following background information in the generation of your prompt: <background>${formattedRag}<background>.${strategy ? `Please also note that the conversational strategy should be: ${strategy}` : ""}`;
 

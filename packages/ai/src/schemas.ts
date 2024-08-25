@@ -1,5 +1,5 @@
 import { z } from "@personality-scraper/common/validation";
 
-export const YouTubeSchema = z.object({
-  handle: z.string().describe("The handle for the user's YouTube account"),
+export const PerplexitySchema = z.object({
+  name: z.string().describe("The name of the creator to search for in Perplexity"),
 });

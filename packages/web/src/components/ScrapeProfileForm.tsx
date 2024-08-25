@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSession } from "next-auth/react";
-import { User } from "@phosphor-icons/react/dist/ssr";
+import { User, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 
 import { callPromptAgent, getTranscripts, useAuth } from "@personality-scraper/api/client";
 import { downloadTextAsFile } from "@personality-scraper/common/downloadTextFile";
@@ -42,7 +42,12 @@ export function ScrapeProfileForm() {
       strategy: undefined,
     },
   });
-  const { handleSubmit, reset, watch } = form;
+  const {
+    handleSubmit,
+    reset,
+    watch,
+    formState: { isValid, isDirty },
+  } = form;
   const { name, strategy } = watch();
 
   async function onSubmit(data: z.infer<typeof SocialSchema>) {
@@ -54,10 +59,10 @@ export function ScrapeProfileForm() {
     } else {
       const now = new Date().toISOString();
       const youtube = await getTranscripts(accessToken);
-      const prompt = await createPrompt({ name, rag: { youtube: youtube.join(", ") }, strategy });
+      const prompt = await createPrompt({ name, rag: { youtube: youtube.join("\n") }, strategy });
 
       if (!error && prompt) {
-        downloadTextAsFile(`${youtube}-${now}-prompt`, prompt);
+        downloadTextAsFile(`${name}-${now}-prompt`, prompt);
         setMessage("Boom goes the dynamite... 🧨💥");
         reset();
       } else {
@@ -104,10 +109,12 @@ export function ScrapeProfileForm() {
           <>
             {!session.data?.accessToken ? (
               <Button type="button" onClick={handleSignIn}>
+                <YoutubeLogo size={20} className="mr-2" />
                 Connect YouTube
               </Button>
             ) : (
-              <Button variant="outline" type="button" onClick={handleSignOut}>
+              <Button variant="destructive" type="button" onClick={handleSignOut}>
+                <YoutubeLogo size={20} className="mr-2" />
                 Disconnect YouTube
               </Button>
             )}
@@ -142,7 +149,7 @@ export function ScrapeProfileForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" size="lg" className="bg-brand">
+            <Button disabled={!isValid && !isDirty} type="submit" size="lg" className="bg-brand">
               Generate
             </Button>
             {message && <p className="py-3">{message}</p>}
