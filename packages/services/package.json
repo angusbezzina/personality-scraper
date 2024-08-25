@@ -19,8 +19,7 @@
     "next": "latest",
     "next-auth": "beta",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "youtube-transcript": "^1.2.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.12.8",

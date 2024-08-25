@@ -1,17 +1,51 @@
-import { YoutubeTranscript } from "youtube-transcript";
-
-import { getPathWithQuery } from "@personality-scraper/common/query";
+import { getPathWithParams, getPathWithQuery } from "@personality-scraper/common/query";
 import { YOUTUBE_ROUTES } from "@personality-scraper/constants";
 
 export namespace YouTube {
-  export async function getTranscript(id: string) {
+  export async function getTranscript(accessToken: string, videoId: string) {
     try {
-      const result = await YoutubeTranscript.fetchTranscript(id);
+      const responseList = await fetch(
+        getPathWithQuery(YOUTUBE_ROUTES.captions, {
+          part: ["id"],
+          videoId,
+        }),
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
 
-      return `<youtubeTranscript>${result.map((transcript) => JSON.stringify(transcript)).join(", ")}</youtubeTranscript>`;
+      const resultList = await responseList.json();
+
+      if (!resultList && !resultList.items) {
+        throw new Error(`Failed to get transcript list for video ${videoId}.`);
+      }
+
+      const firstTranscript = resultList.items[0];
+
+      const response = await fetch(
+        getPathWithQuery(getPathWithParams(YOUTUBE_ROUTES.caption, { id: firstTranscript.id }), {
+          tfmt: "srt",
+        }),
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: "application/octet-stream",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to download caption for ${videoId}`);
+      }
+      const result = await response.text();
+
+      console.log("TRANSCRIPT RESPONSE", result);
+      return `<youtubeTranscript>${result}</youtubeTranscript>`;
     } catch (error) {
       console.error(error);
-      throw new Error(`Failed to get transcript for video ${id}.`);
+      throw new Error(`Failed to get transcript for video ${videoId}.`);
     }
   }
 
@@ -94,7 +128,7 @@ export namespace YouTube {
     try {
       const videoIds = await batchGetVideos(accessToken);
       console.log("VIDEO IDS", videoIds);
-      const results = await Promise.all(videoIds.map(getTranscript));
+      const results = await Promise.all(videoIds.map((id) => getTranscript(accessToken, id)));
 
       return results;
     } catch (error) {

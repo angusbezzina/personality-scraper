@@ -6,8 +6,6 @@ import { SessionProvider, useSession } from "next-auth/react";
 
 import { YOUTUBE_SCOPES } from "@personality-scraper/constants";
 
-console.log("ENV", process.env.AUTH_GOOGLE_ID, process.env.AUTH_GOOGLE_SECRET);
-
 const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
@@ -15,7 +13,7 @@ const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
       authorization: {
         params: {
-          scope: `openid profile email ${YOUTUBE_SCOPES.readOnly}`,
+          scope: `openid profile email ${YOUTUBE_SCOPES.general} ${YOUTUBE_SCOPES.forceSsl} ${YOUTUBE_SCOPES.readOnly}`,
         },
       },
     }),

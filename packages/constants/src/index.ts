@@ -56,8 +56,12 @@ export const YOUTUBE_STEM = "https://www.googleapis.com/youtube/v3";
 export const YOUTUBE_ROUTES = {
   search: `${YOUTUBE_STEM}/search`,
   channel: `${YOUTUBE_STEM}/channels`,
-  caption: `${YOUTUBE_STEM}/caption/[id]`,
-  captions: `${YOUTUBE_STEM}/caption`,
+  caption: `${YOUTUBE_STEM}/captions/[id]`,
+  captions: `${YOUTUBE_STEM}/captions`,
 };
-export const YOUTUBE_SCOPES = { readOnly: "https://www.googleapis.com/auth/youtube.readonly" };
+export const YOUTUBE_SCOPES = {
+  general: "https://www.googleapis.com/auth/youtube",
+  readOnly: "https://www.googleapis.com/auth/youtube.readonly",
+  forceSsl: "https://www.googleapis.com/auth/youtube.force-ssl",
+};
 export const YOUTUBE_API_VERSION = "v3";
