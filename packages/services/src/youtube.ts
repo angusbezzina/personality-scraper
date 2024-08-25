@@ -50,7 +50,10 @@ export namespace YouTube {
         throw new Error("No access token provided");
       }
 
+      console.log("ACCESS TOKEN", accessToken);
+
       const channelId = await getChannelId(accessToken);
+      console.log("CHANNEL ID", channelId);
 
       if (!channelId) {
         throw new Error("No channel ID provided");
