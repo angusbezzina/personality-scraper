@@ -1,4 +1,4 @@
-import { DynamicStructuredTool, type Tool } from "langchain/tools";
+import { DynamicStructuredTool } from "@langchain/community/tools/dynamic";
 import { type AIMessage, type BaseMessage } from "@langchain/core/messages";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { END, MemorySaver, START, StateGraph, type StateGraphArgs } from "@langchain/langgraph/web";
@@ -102,7 +102,7 @@ export async function createPersonalityPrompt({
   // TODO: Scrape context for Podcasts...
   // TODO: Scrape context for Twitter...
 
-  const tools = [searchPerplexity];
+  const tools = [searchPerplexity] as any[];
 
   const { youtube } = rag;
 

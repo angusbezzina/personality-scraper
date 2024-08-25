@@ -30,6 +30,7 @@ const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
+  secret: process.env.AUTH_SECRET,
 });
 
 export { handlers, signIn, signOut, auth, useSession, SessionProvider };
