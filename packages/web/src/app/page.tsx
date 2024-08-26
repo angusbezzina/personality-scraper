@@ -25,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const session = await auth();
+
   return (
     <SessionProvider session={session}>
       <Home />

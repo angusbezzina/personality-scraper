@@ -30,7 +30,7 @@ const SocialSchema = z.object({
 });
 
 export function ScrapeProfileForm() {
-  const { signIn, signOut } = useAuth();
+  const { loading: authLoading, signIn, signOut } = useAuth();
   const session = useSession();
   const [message, setMessage] = React.useState<string>();
   const [{ loading, error }, createPrompt] = useAsyncFn(callPromptAgent);
@@ -79,6 +79,8 @@ export function ScrapeProfileForm() {
   async function handleSignOut(e: React.MouseEvent) {
     e.preventDefault();
     await signOut();
+    // NOTE: Hack to reflect session change more quickly
+    window.location.reload();
   }
 
   React.useEffect(() => {
@@ -108,12 +110,17 @@ export function ScrapeProfileForm() {
         {!loading && (
           <>
             {!session.data?.accessToken ? (
-              <Button type="button" onClick={handleSignIn}>
+              <Button type="button" disabled={authLoading} onClick={handleSignIn}>
                 <YoutubeLogo size={20} className="mr-2" />
                 Connect YouTube
               </Button>
             ) : (
-              <Button variant="destructive" type="button" onClick={handleSignOut}>
+              <Button
+                disabled={authLoading}
+                variant="destructive"
+                type="button"
+                onClick={handleSignOut}
+              >
                 <YoutubeLogo size={20} className="mr-2" />
                 Disconnect YouTube
               </Button>
