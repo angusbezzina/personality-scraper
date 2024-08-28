@@ -7,7 +7,7 @@ import type { z } from "@personality-scraper/common/validation";
 import { type PersonalityScraper } from "@personality-scraper/types";
 
 import { gpt } from "./models";
-import { PerplexitySchema } from "./schemas";
+import { KnowledgeBaseSchema, PerplexitySchema, YouTubeKnowledgeSchema } from "./schemas";
 
 export type PersonalityCreationPrompt = {
   name: string;
@@ -26,8 +26,18 @@ Synthflow is a service that creates AI voice assistants using prompts and audio 
 
 Users will provide you with the name as well as background information that has been scraped from social media platforms of a creator for whom they want to create an audio clone.
 
-Your responsibility to generate the prompt that Synthflow will use to create that audio clone, following these steps EXACTLY:
-1. Using the tools provided, retrieve any additional relevant information about the creator.
+There are three specific tasks that you are responsible for here. Please work through them in order and complete them exactly as instructed.
+
+## Task 1: Using Perplexity, retrieve any additional relevant information about the creator.
+
+## Task 2: Add entries to the Knowledge Base.
+1. For any source of background information that the user provides, separate the information into distinct entities such as posts, videos, articles.
+2. For every entity identified in the previous step, generate an entry for a communal "Knowledge Base" that can be referred back to later to append to the prompt that Synthflow will use to create the audio clone.
+// TODO: Identify the process of creating a knowledge base entry. You may need to make schema changes to the tool based on the requirements Noah has asked for.
+3. Send every Knowledge Base entry that you have generated, add it to the Knowledge Base using the tools at your desposal.
+
+## Task 3: Construct a personality profile.
+// TODO: Clean up the below and allow it to make references to the Knowledge Base entries...
 
 2. Construct a personality profile from the information you have found and the background information that has been provided. Ensure you take note of these particular points:
 * Personal background, including age, gender, nationality, ethnic background, education, pivotal life events and any known family members or close friends.
@@ -41,7 +51,7 @@ Your responsibility to generate the prompt that Synthflow will use to create tha
 * Practical frameworks - Ideologies, paradigms or strategies that the person implements or refers back to frequently in their content.
 * Tonality, Inflection, Voice modulation or any other distinctive aspects of the person's speech/communication.
 
-2. Use the personality profile and any additional information you think is relevant to construct a prompt that will be used to generate the audio clone.
+3. Use the personality profile and any additional information you think is relevant to construct a prompt that will be used to generate the audio clone.
 Use the following template to structure your prompt:
 <promptTemplate>
   ## Background
@@ -85,24 +95,49 @@ export async function createPersonalityPrompt({
   rag,
   strategy,
 }: PersonalityCreationPrompt): Promise<string | undefined> {
+  const knowledgeBaseEntries: PersonalityScraper.KnowledgeBase[] = [];
+
   // Model
   const llm = gpt();
 
   // Tools
+  const addYouTubeKnowledge = new DynamicStructuredTool({
+    name: "add_youtube_knowledge",
+    description: "Pass knowledge gathered from YouTube to the knowledge base",
+    schema: YouTubeKnowledgeSchema,
+    func: async ({ knowledge }: z.infer<typeof YouTubeKnowledgeSchema>) => {
+      // TODO: Step 1: Pass the knowledge to an S3 bucket
+
+      knowledgeBaseEntries.push(knowledge);
+
+      return "";
+    },
+  });
+
   const searchPerplexity = new DynamicStructuredTool({
     name: "search_perplexity",
     description: "Uses a search engine to find additional relevant information about the creator",
     schema: PerplexitySchema,
     func: async ({ name }: z.infer<typeof PerplexitySchema>) => {
-      // TODO: Angus to implement
+      // TODO: Angus to implement...
       return `No more information found for ${name}`;
     },
   });
 
+  const collatedKnowledgeBase = new DynamicStructuredTool({
+    name: "collate_knowledge_base",
+    description: "Pulls all the information from the knowledge base and collates it",
+    schema: KnowledgeBaseSchema,
+    func: async (props: z.infer<typeof KnowledgeBaseSchema>) => {
+      return knowledgeBaseEntries.map((entry) => JSON.stringify(entry)).join(",\n");
+    },
+  });
+
   // TODO: Scrape context for Podcasts...
+  // TODO: Scrape context for Instagram...
   // TODO: Scrape context for Twitter...
 
-  const tools = [searchPerplexity] as any[];
+  const tools = [addYouTubeKnowledge, searchPerplexity, collatedKnowledgeBase] as any[];
 
   const { youtube } = rag;
 
@@ -163,6 +198,8 @@ export async function createPersonalityPrompt({
   console.log("USER PROMPT", userPrompt);
   console.log("FINAL STATE", finalState);
   const lastMessage = finalState.messages[finalState.messages.length - 1].content;
+
+  // TODO: Pass back the Knowledge Base array...
 
   return lastMessage;
 }

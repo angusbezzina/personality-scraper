@@ -3,4 +3,8 @@ export namespace PersonalityScraper {
   export type SocialData = {
     youtube: string;
   };
+  export type KnowledgeBase = {
+    title: string;
+    description: string;
+  };
 }
