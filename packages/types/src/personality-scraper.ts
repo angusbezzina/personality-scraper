@@ -6,5 +6,8 @@ export namespace PersonalityScraper {
   export type KnowledgeBase = {
     title: string;
     description: string;
+    topics: string[];
+    takeaways: string[];
+    questions: { question: string; response: string }[];
   };
 }
