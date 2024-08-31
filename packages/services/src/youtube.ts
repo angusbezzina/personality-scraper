@@ -16,12 +16,11 @@ export namespace YouTube {
         },
       );
 
-      const resultList = await responseList.json();
-
-      if (!resultList && !resultList.items) {
+      if (!responseList.ok) {
         throw new Error(`Failed to get transcript list for video ${videoId}.`);
       }
 
+      const resultList = await responseList.json();
       const firstTranscript = resultList.items[0];
 
       const response = await fetch(
@@ -39,9 +38,9 @@ export namespace YouTube {
       if (!response.ok) {
         throw new Error(`Failed to download caption for ${videoId}`);
       }
+
       const result = await response.text();
 
-      console.log("TRANSCRIPT RESPONSE", result);
       return `<youtubeTranscript>${result}</youtubeTranscript>`;
     } catch (error) {
       console.error(error);
@@ -54,6 +53,7 @@ export namespace YouTube {
       if (!accessToken) {
         throw new Error("No access token provided");
       }
+
       const response = await fetch(
         getPathWithQuery(YOUTUBE_ROUTES.channel, {
           part: ["id"],
@@ -65,11 +65,12 @@ export namespace YouTube {
           },
         },
       );
-      const result = await response.json();
 
-      if (!result && !result.items) {
-        throw new Error("Failed to get YouTube channel ID");
+      if (!response.ok) {
+        throw new Error("YouTube API request failed");
       }
+
+      const result = await response.json();
 
       return result.items[0].id;
     } catch (error) {
@@ -84,10 +85,7 @@ export namespace YouTube {
         throw new Error("No access token provided");
       }
 
-      console.log("ACCESS TOKEN", accessToken);
-
       const channelId = await getChannelId(accessToken);
-      console.log("CHANNEL ID", channelId);
 
       if (!channelId) {
         throw new Error("No channel ID provided");
@@ -107,11 +105,12 @@ export namespace YouTube {
           },
         },
       );
-      const result = await response.json();
 
-      if (!result || !result.items) {
-        throw new Error("Failed to get YouTube video IDs");
+      if (!response.ok) {
+        throw new Error("YouTube API Failed");
       }
+
+      const result = await response.json();
 
       const videoIds: string[] =
         result.items?.map(({ id }: any) => id.videoId)?.filter(Boolean) || [];
@@ -127,7 +126,6 @@ export namespace YouTube {
   export async function batchGetTranscripts(accessToken: string) {
     try {
       const videoIds = await batchGetVideos(accessToken);
-      console.log("VIDEO IDS", videoIds);
       const results = await Promise.all(videoIds.map((id) => getTranscript(accessToken, id)));
 
       return results;

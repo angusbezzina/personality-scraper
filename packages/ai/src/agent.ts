@@ -3,7 +3,9 @@ import { type AIMessage, type BaseMessage } from "@langchain/core/messages";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { END, MemorySaver, START, StateGraph, type StateGraphArgs } from "@langchain/langgraph/web";
 
+import { slugify } from "@personality-scraper/common/slugify";
 import type { z } from "@personality-scraper/common/validation";
+import { FileStorage } from "@personality-scraper/services";
 import { type PersonalityScraper } from "@personality-scraper/types";
 
 import { gpt } from "./models";
@@ -101,8 +103,9 @@ export async function createPersonalityPrompt({
   name,
   rag,
   strategy,
-}: PersonalityCreationPrompt): Promise<string | undefined> {
+}: PersonalityCreationPrompt): Promise<PersonalityScraper.PersonalityPromptOutput> {
   const knowledgeBaseEntries: PersonalityScraper.KnowledgeBase[] = [];
+  const knowledgeBasePaths: PersonalityScraper.Path[] = [];
 
   // Model
   const llm = gpt();
@@ -113,9 +116,18 @@ export async function createPersonalityPrompt({
     description: "Pass knowledge gathered from YouTube to the knowledge base",
     schema: YouTubeKnowledgeSchema,
     func: async ({ knowledge }: z.infer<typeof YouTubeKnowledgeSchema>) => {
-      // TODO: Step 1: Pass the knowledge to an S3 bucket
-
       knowledgeBaseEntries.push(knowledge);
+
+      const file = Buffer.from(JSON.stringify(knowledge));
+      const path = `${slugify(knowledge.title)}.txt` as PersonalityScraper.Path;
+
+      try {
+        await FileStorage.uploadFile(path, file);
+
+        knowledgeBasePaths.push(path);
+      } catch (error) {
+        console.error("Failed to upload knowledge base file to S3");
+      }
 
       return "";
     },
@@ -192,12 +204,11 @@ export async function createPersonalityPrompt({
     messages: prompt,
   });
 
-  console.log("SYSTEM PROMPT", SYSTEM_PROMPT);
-  console.log("USER PROMPT", userPrompt);
-  console.log("FINAL STATE", finalState);
   const lastMessage = finalState.messages[finalState.messages.length - 1].content;
 
-  // TODO: Pass back the Knowledge Base array...
+  if (!lastMessage) {
+    throw new Error("No prompt generated");
+  }
 
-  return lastMessage;
+  return { prompt: lastMessage, knowledgeBase: knowledgeBasePaths };
 }

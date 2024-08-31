@@ -4,8 +4,13 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import { User, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 
-import { callPromptAgent, getTranscripts, useAuth } from "@personality-scraper/api/client";
-import { downloadTextAsFile } from "@personality-scraper/common/downloadTextFile";
+import {
+  callPromptAgent,
+  getDownloadUrl,
+  getTranscripts,
+  useAuth,
+} from "@personality-scraper/api/client";
+import { slugify } from "@personality-scraper/common/slugify";
 import { z } from "@personality-scraper/common/validation";
 import {
   Button,
@@ -21,8 +26,11 @@ import {
   useForm,
   zodResolver,
 } from "@personality-scraper/components";
+import type { PersonalityScraper } from "@personality-scraper/types";
 
 import { useAsyncFn } from "../hooks/useAsyncFn";
+
+import { useDownloadFiles } from "@/hooks/useDownloadFiles";
 
 const SocialSchema = z.object({
   name: z.string().min(2, "Please enter a valid name"),
@@ -32,6 +40,7 @@ const SocialSchema = z.object({
 export function ScrapeProfileForm() {
   const { loading: authLoading, signIn, signOut } = useAuth();
   const session = useSession();
+  const downloadFiles = useDownloadFiles();
   const [message, setMessage] = React.useState<string>();
   const [{ loading, error }, createPrompt] = useAsyncFn(callPromptAgent);
   const form = useForm({
@@ -59,15 +68,46 @@ export function ScrapeProfileForm() {
     } else {
       const now = new Date().toISOString();
       const youtube = await getTranscripts(accessToken);
-      const prompt = await createPrompt({ name, rag: { youtube: youtube.join("\n") }, strategy });
+      const promptOutput = await createPrompt({
+        name,
+        rag: { youtube: youtube.join("\n") },
+        strategy,
+      });
 
-      if (!error && prompt) {
-        downloadTextAsFile(`${name}-${now}-prompt`, prompt);
-        setMessage("Boom goes the dynamite... 🧨💥");
-        reset();
-      } else {
+      if (error) {
         setMessage("Something went wrong 😔");
+
+        return;
       }
+
+      const { prompt, knowledgeBase = [] } = promptOutput;
+
+      const promptFile = new Blob([prompt], { type: "text/plain" });
+      const promptInput = {
+        file: promptFile,
+        filename: `${slugify(name)}-${now}-prompt.txt`,
+      };
+
+      const knowledgeBaseInputs = await Promise.all(
+        knowledgeBase.map(async (path, index) => {
+          const url = (await getDownloadUrl(path)) as PersonalityScraper.Url;
+          const response = await fetch(url);
+          const file = await response.blob();
+
+          return {
+            file,
+            filename: `${slugify(name)}-knowledgebase-${index + 1}.txt`,
+          };
+        }),
+      );
+
+      const fileInputs = [promptInput, ...knowledgeBaseInputs];
+      console.log(fileInputs);
+
+      downloadFiles(fileInputs);
+
+      setMessage("Boom goes the dynamite... 🧨💥");
+      reset();
     }
   }
 

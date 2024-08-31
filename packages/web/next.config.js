@@ -27,7 +27,8 @@ const nextConfig = {
     ],
   },
   transpilePackages: [
-    "@personality-scraper/api",
+    "@personality-scraper/api/client",
+    "@personality-scraper/api/server",
     "@personality-scraper/common",
     "@personality-scraper/components",
     "@personality-scraper/constants",
