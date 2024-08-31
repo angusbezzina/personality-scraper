@@ -116,9 +116,32 @@ export async function createPersonalityPrompt({
     description: "Pass knowledge gathered from YouTube to the knowledge base",
     schema: YouTubeKnowledgeSchema,
     func: async ({ knowledge }: z.infer<typeof YouTubeKnowledgeSchema>) => {
+      const { title, description, topics, takeaways, questions } = knowledge;
       knowledgeBaseEntries.push(knowledge);
+      const fileOutput = `
+        # ${title}
 
-      const file = Buffer.from(JSON.stringify(knowledge));
+        ## Description
+        ${description}
+
+        ## Topics
+        ${topics.join("\n")}
+
+        ## Takeaways
+        ${takeaways.join("\n")}
+
+        ## Questions
+        ${questions
+          .map(
+            ({ question, response }) => `
+          #### ${question}
+          ${response}
+        `,
+          )
+          .join("\n")}
+      `;
+
+      const file = Buffer.from(fileOutput);
       const path = `${slugify(knowledge.title)}.txt` as PersonalityScraper.Path;
 
       try {

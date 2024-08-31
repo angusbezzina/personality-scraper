@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { HttpStatus } from "@personality-scraper/constants";
 
-import { auth, callPromptAgent, getDownloadUrl, getTranscripts, signIn, signOut } from "./actions";
+import {
+  auth,
+  createPersonalityPrompt,
+  getDownloadUrl,
+  getTranscripts,
+  signIn,
+  signOut,
+} from "./actions";
 
 const publicActions = {};
 
 export const privateActions = {
   auth,
-  callPromptAgent,
+  createPersonalityPrompt,
   getDownloadUrl,
   getTranscripts,
   signIn,

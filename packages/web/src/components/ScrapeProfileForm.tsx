@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { User, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 
 import {
-  callPromptAgent,
+  createPersonalityPrompt,
   getDownloadUrl,
   getTranscripts,
   useAuth,
@@ -42,7 +42,7 @@ export function ScrapeProfileForm() {
   const session = useSession();
   const downloadFiles = useDownloadFiles();
   const [message, setMessage] = React.useState<string>();
-  const [{ loading, error }, createPrompt] = useAsyncFn(callPromptAgent);
+  const [{ loading, error }, createPrompt] = useAsyncFn(createPersonalityPrompt);
   const form = useForm({
     mode: "onSubmit",
     resolver: zodResolver(SocialSchema),
