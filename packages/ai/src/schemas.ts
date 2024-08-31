@@ -2,7 +2,8 @@ import { z } from "@personality-scraper/common/validation";
 
 export const KnowledgeBaseSchema = z.object({});
 export const PerplexitySchema = z.object({
-  name: z.string().describe("The name of the creator to search for in Perplexity"),
+  name: z.string().describe("The name of the creator you are creating a prompt for"),
+  query: z.string().describe("The query that you want to answer using Perplexity"),
 });
 export const YouTubeKnowledgeSchema = z.object({
   knowledge: z.object({

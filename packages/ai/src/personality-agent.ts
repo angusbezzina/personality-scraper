@@ -160,8 +160,9 @@ export async function createPersonalityPrompt({
     name: "search_perplexity",
     description: "Uses a search engine to find additional relevant information about the creator",
     schema: PerplexitySchema,
-    func: async ({ name }: z.infer<typeof PerplexitySchema>) => {
-      // TODO: Angus to implement...
+    func: async ({ name, query }: z.infer<typeof PerplexitySchema>) => {
+      // TODO: Implement Perplexity and give the AI the ability to follow up with additional relevant information
+
       return `No more information found for ${name}`;
     },
   });
