@@ -4,9 +4,15 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import { User, YoutubeLogo } from "@phosphor-icons/react/dist/ssr";
 
-import { callPromptAgent, getTranscripts, useAuth } from "@personality-scraper/api/client";
-import { downloadTextAsFile } from "@personality-scraper/common/downloadTextFile";
+import {
+  createPersonalityPrompt,
+  getDownloadUrl,
+  getTranscripts,
+  useAuth,
+} from "@personality-scraper/api/client";
+import { slugify } from "@personality-scraper/common/slugify";
 import { z } from "@personality-scraper/common/validation";
+import { type FileInput, zipMultipleFiles } from "@personality-scraper/common/zip";
 import {
   Button,
   Form,
@@ -21,8 +27,11 @@ import {
   useForm,
   zodResolver,
 } from "@personality-scraper/components";
+import type { PersonalityScraper } from "@personality-scraper/types";
 
 import { useAsyncFn } from "../hooks/useAsyncFn";
+
+import { createTextDataUrl } from "@/utils/text";
 
 const SocialSchema = z.object({
   name: z.string().min(2, "Please enter a valid name"),
@@ -33,7 +42,7 @@ export function ScrapeProfileForm() {
   const { loading: authLoading, signIn, signOut } = useAuth();
   const session = useSession();
   const [message, setMessage] = React.useState<string>();
-  const [{ loading, error }, createPrompt] = useAsyncFn(callPromptAgent);
+  const [{ loading, error }, createPrompt] = useAsyncFn(createPersonalityPrompt);
   const form = useForm({
     mode: "onSubmit",
     resolver: zodResolver(SocialSchema),
@@ -59,15 +68,46 @@ export function ScrapeProfileForm() {
     } else {
       const now = new Date().toISOString();
       const youtube = await getTranscripts(accessToken);
-      const prompt = await createPrompt({ name, rag: { youtube: youtube.join("\n") }, strategy });
+      const promptOutput = await createPrompt({
+        name,
+        rag: { youtube: youtube.join("\n") },
+        strategy,
+      });
 
-      if (!error && prompt) {
-        downloadTextAsFile(`${name}-${now}-prompt`, prompt);
-        setMessage("Boom goes the dynamite... 🧨💥");
-        reset();
-      } else {
+      if (error) {
         setMessage("Something went wrong 😔");
+
+        return;
       }
+
+      const { prompt, knowledgeBase = [] } = promptOutput;
+      const slug = slugify(name);
+
+      const promptInput = {
+        url: createTextDataUrl(prompt),
+        filename: `${slug}-${now}-prompt.txt`,
+      };
+
+      const knowledgeBaseInputs = await Promise.all(
+        knowledgeBase.map(async (path, index) => {
+          const url = (await getDownloadUrl(path)) as PersonalityScraper.Url;
+          const response = await fetch(url);
+          const file = await response.blob();
+          const text = await file.text();
+
+          return {
+            url: createTextDataUrl(text),
+            filename: `${slug}-knowledgebase-${index + 1}.txt`,
+          };
+        }),
+      );
+
+      const fileInputs = [promptInput, ...knowledgeBaseInputs] as FileInput[];
+
+      zipMultipleFiles(fileInputs, `${slug}-files`);
+
+      setMessage("Boom goes the dynamite... 🧨💥");
+      reset();
     }
   }
 

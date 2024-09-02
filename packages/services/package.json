@@ -10,6 +10,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.485.0",
+    "@aws-sdk/lib-storage": "^3.637.0",
+    "@aws-sdk/s3-presigned-post": "^3.485.0",
+    "@aws-sdk/s3-request-presigner": "^3.485.0",
     "@personality-scraper/common": "*",
     "@personality-scraper/constants": "*",
     "@personality-scraper/types": "*",

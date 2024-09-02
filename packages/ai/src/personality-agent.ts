@@ -3,11 +3,13 @@ import { type AIMessage, type BaseMessage } from "@langchain/core/messages";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { END, MemorySaver, START, StateGraph, type StateGraphArgs } from "@langchain/langgraph/web";
 
+import { slugify } from "@personality-scraper/common/slugify";
 import type { z } from "@personality-scraper/common/validation";
+import { FileStorage } from "@personality-scraper/services";
 import { type PersonalityScraper } from "@personality-scraper/types";
 
 import { gpt } from "./models";
-import { PerplexitySchema } from "./schemas";
+import { PerplexitySchema, YouTubeKnowledgeSchema } from "./schemas";
 
 export type PersonalityCreationPrompt = {
   name: string;
@@ -26,10 +28,24 @@ Synthflow is a service that creates AI voice assistants using prompts and audio 
 
 Users will provide you with the name as well as background information that has been scraped from social media platforms of a creator for whom they want to create an audio clone.
 
-Your responsibility to generate the prompt that Synthflow will use to create that audio clone, following these steps EXACTLY:
-1. Using the tools provided, retrieve any additional relevant information about the creator.
+There are four specific tasks that you are responsible for here. Please work through them in order and complete them exactly as instructed.
 
-2. Construct a personality profile from the information you have found and the background information that has been provided. Ensure you take note of these particular points:
+## Task 1: Search for additional relevant information about the creator. 
+Using Perplexity, retrieve any additional relevant information about the creator.
+
+## Task 2: Add entries to the Knowledge Base.
+1. For any source of background information that the user provides, separate the information into distinct entities such as posts, videos or articles.
+2. For every entity identified, generate an entry for a communal "Knowledge Base" that Synthflow can refer back to later to enhance the audio clone.
+   Every entry for the knowledge base should include the following:
+   * The title of the entity.
+   * A description of what the entity is about.
+   * The key topics or themes of the entity.
+   * The key takeaways or lessons learned from the entity.
+   * Potential questions that a user may ask that are related to the content of the entity and responses to those questions in the style and tone of the creator.
+3. Add every Knowledge Base entry that you have generated to the Knowledge Base using the tools at your desposal.
+
+## Task 3: Construct a personality profile.
+Construct a personality profile from all of the information that you have about the creator. Ensure you make note of these particular points:
 * Personal background, including age, gender, nationality, ethnic background, education, pivotal life events and any known family members or close friends.
 * Personality traits - outline up to 10 of the most distinctive traits that describe this person.
 * Demeanor - how this person communicates.
@@ -41,11 +57,12 @@ Your responsibility to generate the prompt that Synthflow will use to create tha
 * Practical frameworks - Ideologies, paradigms or strategies that the person implements or refers back to frequently in their content.
 * Tonality, Inflection, Voice modulation or any other distinctive aspects of the person's speech/communication.
 
-2. Use the personality profile and any additional information you think is relevant to construct a prompt that will be used to generate the audio clone.
+## Task 4: Write a prompt that will be used to generate the audio clone on Synthflow.
+Using all of the information that you have gathered so far, write a prompt that will be used to generate the audio clone on Synthflow.
 Use the following template to structure your prompt:
 <promptTemplate>
-  ## Background
-  - A brief summary of the person and their background.
+  ## Personality Profile
+  - A detailed description of the personality profile created in Task 3.
 
   ## Personality Traits
   - List of up to 15 personality traits that are most indicative of this person.
@@ -58,9 +75,11 @@ Use the following template to structure your prompt:
   ## Philosophy and Views
   - List the persons philosophies and ideals.
 
+  ## Knowledge Base Entries
+  - List the titles of all of the Knowledge Base entries that you generated in Task 2.
+
   ## Sample Interactions
-  - Identify and extract the 20 sample interactions from the scraped content that is the most representative of the person. 
-  - These should be literal quotations from transcripts provided and should demonstrate how the person communicates on specific topics.
+  - Using the questions and answers from the Knowledge Base entries, take up to 20 sample interactions that are the most representative of the creator. 
   
   ## Common words and phrases:
   - Create a list of the most commonly used words, phrases or expressions by this person.
@@ -84,25 +103,75 @@ export async function createPersonalityPrompt({
   name,
   rag,
   strategy,
-}: PersonalityCreationPrompt): Promise<string | undefined> {
+}: PersonalityCreationPrompt): Promise<PersonalityScraper.PersonalityPromptOutput> {
+  const knowledgeBaseEntries: PersonalityScraper.KnowledgeBase[] = [];
+  const knowledgeBasePaths: PersonalityScraper.Path[] = [];
+
   // Model
   const llm = gpt();
 
   // Tools
+  const addYouTubeKnowledge = new DynamicStructuredTool({
+    name: "add_youtube_knowledge",
+    description: "Pass knowledge gathered from YouTube to the knowledge base",
+    schema: YouTubeKnowledgeSchema,
+    func: async ({ knowledge }: z.infer<typeof YouTubeKnowledgeSchema>) => {
+      const { title, description, topics, takeaways, questions } = knowledge;
+      knowledgeBaseEntries.push(knowledge);
+      const fileOutput = `
+        # ${title}
+
+        ## Description
+        ${description}
+
+        ## Topics
+        ${topics.join("\n")}
+
+        ## Takeaways
+        ${takeaways.join("\n")}
+
+        ## Questions
+        ${questions
+          .map(
+            ({ question, response }) => `
+          #### ${question}
+          ${response}
+        `,
+          )
+          .join("\n")}
+      `;
+
+      const file = Buffer.from(fileOutput);
+      const path = `${slugify(knowledge.title)}.txt` as PersonalityScraper.Path;
+
+      try {
+        await FileStorage.uploadFile(path, file);
+
+        knowledgeBasePaths.push(path);
+      } catch (error) {
+        console.error("Failed to upload knowledge base file to S3");
+      }
+
+      return "";
+    },
+  });
+
   const searchPerplexity = new DynamicStructuredTool({
     name: "search_perplexity",
     description: "Uses a search engine to find additional relevant information about the creator",
     schema: PerplexitySchema,
-    func: async ({ name }: z.infer<typeof PerplexitySchema>) => {
-      // TODO: Angus to implement
+    func: async ({ name, query }: z.infer<typeof PerplexitySchema>) => {
+      // TODO: Implement Perplexity and give the AI the ability to follow up with additional relevant information
+
       return `No more information found for ${name}`;
     },
   });
 
   // TODO: Scrape context for Podcasts...
+  // TODO: Scrape context for Instagram...
   // TODO: Scrape context for Twitter...
 
-  const tools = [searchPerplexity] as any[];
+  const tools = [addYouTubeKnowledge, searchPerplexity] as any[];
 
   const { youtube } = rag;
 
@@ -159,10 +228,11 @@ export async function createPersonalityPrompt({
     messages: prompt,
   });
 
-  console.log("SYSTEM PROMPT", SYSTEM_PROMPT);
-  console.log("USER PROMPT", userPrompt);
-  console.log("FINAL STATE", finalState);
   const lastMessage = finalState.messages[finalState.messages.length - 1].content;
 
-  return lastMessage;
+  if (!lastMessage) {
+    throw new Error("No prompt generated");
+  }
+
+  return { prompt: lastMessage, knowledgeBase: knowledgeBasePaths };
 }

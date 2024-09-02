@@ -1,1 +1,1 @@
-export * from "./agent";
+export * from "./personality-agent";
