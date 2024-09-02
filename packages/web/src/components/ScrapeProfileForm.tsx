@@ -12,6 +12,7 @@ import {
 } from "@personality-scraper/api/client";
 import { slugify } from "@personality-scraper/common/slugify";
 import { z } from "@personality-scraper/common/validation";
+import { type FileInput, zipMultipleFiles } from "@personality-scraper/common/zip";
 import {
   Button,
   Form,
@@ -30,7 +31,7 @@ import type { PersonalityScraper } from "@personality-scraper/types";
 
 import { useAsyncFn } from "../hooks/useAsyncFn";
 
-import { useDownloadFiles } from "@/hooks/useDownloadFiles";
+import { createTextDataUrl } from "@/utils/text";
 
 const SocialSchema = z.object({
   name: z.string().min(2, "Please enter a valid name"),
@@ -40,7 +41,6 @@ const SocialSchema = z.object({
 export function ScrapeProfileForm() {
   const { loading: authLoading, signIn, signOut } = useAuth();
   const session = useSession();
-  const downloadFiles = useDownloadFiles();
   const [message, setMessage] = React.useState<string>();
   const [{ loading, error }, createPrompt] = useAsyncFn(createPersonalityPrompt);
   const form = useForm({
@@ -81,11 +81,11 @@ export function ScrapeProfileForm() {
       }
 
       const { prompt, knowledgeBase = [] } = promptOutput;
+      const slug = slugify(name);
 
-      const promptFile = new Blob([prompt], { type: "text/plain" });
       const promptInput = {
-        file: promptFile,
-        filename: `${slugify(name)}-${now}-prompt.txt`,
+        url: createTextDataUrl(prompt),
+        filename: `${slug}-${now}-prompt.txt`,
       };
 
       const knowledgeBaseInputs = await Promise.all(
@@ -93,18 +93,18 @@ export function ScrapeProfileForm() {
           const url = (await getDownloadUrl(path)) as PersonalityScraper.Url;
           const response = await fetch(url);
           const file = await response.blob();
+          const text = await file.text();
 
           return {
-            file,
-            filename: `${slugify(name)}-knowledgebase-${index + 1}.txt`,
+            url: createTextDataUrl(text),
+            filename: `${slug}-knowledgebase-${index + 1}.txt`,
           };
         }),
       );
 
-      const fileInputs = [promptInput, ...knowledgeBaseInputs];
-      console.log(fileInputs);
+      const fileInputs = [promptInput, ...knowledgeBaseInputs] as FileInput[];
 
-      downloadFiles(fileInputs);
+      zipMultipleFiles(fileInputs, `${slug}-files`);
 
       setMessage("Boom goes the dynamite... 🧨💥");
       reset();
