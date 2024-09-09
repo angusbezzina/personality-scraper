@@ -81,6 +81,7 @@ export function ScrapeProfileForm() {
       }
 
       const { prompt, knowledgeBase = [] } = promptOutput;
+      console.log("PROMPT", prompt);
       const slug = slugify(name);
 
       const promptInput = {
@@ -101,6 +102,8 @@ export function ScrapeProfileForm() {
           };
         }),
       );
+
+      console.log("KB", knowledgeBaseInputs);
 
       const fileInputs = [promptInput, ...knowledgeBaseInputs] as FileInput[];
 
